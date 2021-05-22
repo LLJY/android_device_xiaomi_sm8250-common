@@ -240,9 +240,10 @@ set_speaker_light_locked(struct light_device_t* dev,
 
     if (onMS != 0 && offMS != 0)
         blink = 1;
-
+    // we probably can convert the cases into functions, but test first before doing that.
     switch (state->flashMode) {
         case LIGHT_FLASH_HARDWARE:
+            ALOGD("setting hardware blink");
             if (!!white)
                 rc |= set_rgb_led_hw_blink(LED_WHITE, blink);
             if (!!red)
@@ -251,22 +252,30 @@ set_speaker_light_locked(struct light_device_t* dev,
                 rc |= set_rgb_led_hw_blink(LED_GREEN, blink);
             if (!!blue)
                 rc |= set_rgb_led_hw_blink(LED_BLUE, blink);
-            /* fallback to timed blinking if breath is not supported */
-            if (rc == 0)
-                break;
+            break;
+        /* we do not support timed flash on our devices, temporary debug workaround, use light flash hardware's code */
         case LIGHT_FLASH_TIMED:
+            ALOGD("setting timed blink");
             if (!!white)
-                rc = set_rgb_led_timer_trigger(LED_WHITE, onMS, offMS);
+                rc |= set_rgb_led_hw_blink(LED_WHITE, blink);
             if (!!red)
-                rc |= set_rgb_led_timer_trigger(LED_RED, onMS, offMS);
+                rc |= set_rgb_led_hw_blink(LED_RED, blink);
             if (!!green)
-                rc |= set_rgb_led_timer_trigger(LED_GREEN, onMS, offMS);
+                rc |= set_rgb_led_hw_blink(LED_GREEN, blink);
             if (!!blue)
-                rc |= set_rgb_led_timer_trigger(LED_BLUE, onMS, offMS);
-            /* fallback to constant on if timed blinking is not supported */
-            if (rc == 0)
-                break;
+                rc |= set_rgb_led_hw_blink(LED_BLUE, blink);
+            break;
         case LIGHT_FLASH_NONE:
+            ALOGD("setting led off");
+            if (!!white)
+                rc |= set_rgb_led_hw_blink(LED_WHITE, 0);
+            if (!!red)
+                rc |= set_rgb_led_hw_blink(LED_RED, 0);
+            if (!!green)
+                rc |= set_rgb_led_hw_blink(LED_GREEN, 0);
+            if (!!blue)
+                rc |= set_rgb_led_hw_blink(LED_BLUE, 0);
+            break;
         default:
             rc = set_rgb_led_brightness(LED_WHITE, white>0 ? 2 : 0);
             rc |= set_rgb_led_brightness(LED_RED, red);
