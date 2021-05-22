@@ -244,7 +244,6 @@ set_speaker_light_locked(struct light_device_t* dev,
     switch (state->flashMode) {
         case LIGHT_FLASH_HARDWARE:
             if (!!white)
-		rc = set_rgb_led_brightness(LED_WHITE, white>0 ? 1 : 0);
                 rc |= set_rgb_led_hw_blink(LED_WHITE, blink);
             if (!!red)
                 rc |= set_rgb_led_hw_blink(LED_RED, blink);
